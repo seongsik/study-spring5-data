@@ -210,7 +210,13 @@ repositories {
 
 
 dependencies {
-    compile spring.context, misc.slf4jJcl, misc.logback
+    compile spring.context, misc.slf4jJcl, misc.logback, misc.lombok
+
+    // database dependency
+    compile spring.jdbc, db.dbcp2, misc.lang3
+
+    // embedded database settings
+    compile db.h2, db.derby
 
     testCompile testing.junit
 }
