@@ -211,7 +211,7 @@ repositories {
 
 dependencies {
     compile spring.context, misc.slf4jJcl, misc.logback, misc.lombok
-
+    annotationProcessor(misc.lombok)
     // database dependency
     compile spring.jdbc, db.dbcp2, misc.lang3
 
