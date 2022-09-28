@@ -13,6 +13,6 @@ public interface SingerDao {
 //    void insert(Singer singer);
 //    void update(Singer singer);
 //    void delete(Long singerId);
-//    List<Singer> findAllWithAlbums();
+    List<Singer> findAllWithAlbums();
 //    void insertWithAlbum(Singer singer);
 }

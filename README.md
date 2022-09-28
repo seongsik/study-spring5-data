@@ -67,3 +67,8 @@ jdbcTemplate.setDataSource(dataSource);
 #### RowMapper<T>
 * 데이터 여러 Row를 질의하여 엔티티로 변환하여 사용한다. 
 * RowMapper<Entity Class> 를 이용해 JDBC ResultSet 을 POJO 객체로 매핑할 수 있다.
+
+#### ResultSetExtractor
+* RowMapper<T>는 단일 도메인 객체에만 매핑할 수 있다. 
+* ResultSetExtractor 구현체를 이용해 JDBC ResultSet 을 보다 복잡한 객체 컬렉션으로 반환받을 수 있다.
+
