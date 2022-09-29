@@ -176,3 +176,19 @@ public class SingerDaoImpl implements SingerDao {
 hibernateProp.put("hibernate.hbm2ddl.auto", "create-drop");
 ```
 
+
+------------------------------------------------------------------
+## Spring JPA
+* Java Persistence API. 
+* 하이버네이트의 영향을 받은 자바 데이터 액세스 기술 표준. 
+* JPQL (Java Persistence Query Language) 를 사용, DBMS에 무관하게 적용 가능함. 
+
+#### Dependencies
+```groovy
+dependencies {
+  compile "org.hibernate:hibernate-entitymanager:5.6.5.Final"
+  compile "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final"
+  ...
+  testCompile testing.junit
+}
+```

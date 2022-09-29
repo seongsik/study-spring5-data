@@ -219,9 +219,10 @@ dependencies {
     compile db.h2, db.derby
 
     // hibernate settings
-    if(!project.name.contains("boot")) {
-        compile spring.annotationApi, spring.contextSupport, spring.orm, hibernate.em
-    }
+    compile spring.annotationApi, spring.contextSupport, spring.orm, hibernate.em
+
+    // JPA settings
+    compile hibernate.em, hibernate.jpaApi
 
     testCompile testing.junit
 }
