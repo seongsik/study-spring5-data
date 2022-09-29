@@ -72,3 +72,107 @@ jdbcTemplate.setDataSource(dataSource);
 * RowMapper<T>는 단일 도메인 객체에만 매핑할 수 있다. 
 * ResultSetExtractor 구현체를 이용해 JDBC ResultSet 을 보다 복잡한 객체 컬렉션으로 반환받을 수 있다.
 
+### Spring JDBC Classes
+* MappingSqlQuery<T> : SQL 문자열과 mapRow() 메서드를 한 클래스로 감싸 준다. 
+* SqlUpdate : 모든 Update SQL 문을 Wrapping할 수 있다.
+* BatchSqlUpdate : 다수의 SQL문을 Batch 로 실행한다. 
+* SqlFunction<T> : 데이터베이스 함수에 인자 및 반환 타입을 지정해 호출. 
+* @Repository, @Resource : JDBC DAO를 설정할 때 사용
+
+------------------------------------------------------------------
+## Spring Hibernate
+* ORM (Object-Relational Mapping) 라이브러리.
+* 하이버네이트가 직접 생성하는 SQL을 제어할 수는 없으므로 연관관계, 즉시/지연로딩 전략을 정의할 때 주의.
+* batch size, fetch size 를 조절하여 최적 수준을 찾아야 함. 
+
+#### Dependencies
+```groovy
+dependencies {
+    compile "javax.annotation:javax.annotation-api:1.3.2"
+    compile "org.springframework:spring-context-support:5.3.22"
+    compile "org.springframework:spring-orm:5.3.22"
+    compile "org.hibernate:hibernate-entitymanager:5.6.5.Final"
+    ...
+    testCompile testing.junit
+}
+```
+
+### Entity 
+* @Entity 애너테이션을 적용하여 엔티티 클래스임을 명시 
+* @Table 및 @Column 애너테이션으로 매핑 정의
+* @Id : Primary Key를 정의. @GeneratedValue 으로 id 값 생성 방법을 함께 정의. 
+* @Version : version 이 선언되면 하이버네이트는 변경감지를 통해 값을 증가시킴. 
+
+#### Relation
+##### one-to-many
+* 1:N 관계로 가장 자주 사용되는 관계. 
+```java
+private Set<Album> albums = new HashSet<>();
+
+@OneToMany(mappedBy = "singer", cascade = CascadeType.ALL, orphanRemoval = true)
+public Set<Album> getAlbums() {
+    return albums;
+}
+```
+```java
+private Singer singer;
+
+@ManyToOne
+@JoinColumn(name = "SINGER_ID")
+public Singer getSinger() {
+    return singer;
+}
+```
+
+##### many-to-many
+* JOIN TABLE 을 해 다수의 레코드간의 N:N 관계를 정의함. 
+```java
+private Set<Instrument> instruments = new HashSet<>();
+
+@ManyToMany
+@JoinTable(name = "singer_instrument", joinColumns = @JoinColumn(name = "SINGER_ID"), inverseJoinColumns = @JoinColumn(name = "INSTRUMENT_ID"))
+public Set<Instrument> getInstruments() {
+    return instruments;
+}
+```
+```java
+private Set<Singer> singers = new HashSet<>();
+
+@ManyToMany
+@JoinTable(name = "singer_instrument", joinColumns = @JoinColumn(name = "INSTRUMENT_ID"), inverseJoinColumns = @JoinColumn(name = "SINGER_ID"))
+public Set<Singer> getSingers() {
+    return singers;
+}
+```
+
+### Hibernate Session
+* 데이터베이스 조작을 위해 SessionFactory 로부터 Session 을 구한다. 
+* @Repository 애너테이션을 적용해 스프링 빈으로 선언. 트랜잭션 요구사항을 정의할 때 사용한다. 
+* @Resource 애너테이션을 이용해 sessionFactory 애트리뷰트를 주입. 
+```java
+@Repository("singerDao")
+public class SingerDaoImpl implements SingerDao {
+  private SessionFactory sessionFactory;
+  
+  @Resource(name = "sessionFactory")
+  public void setSessionFactory(SessionFactory sessionFactory) {
+    this.sessionFactory = sessionFactory;
+  }
+  ... 
+}
+```
+
+#### Hibernate Entity 로 Table 생성하기
+* Hibernate를 사용한 개발 시, 엔티티를 작성하고 테이블을 생성하는 것이 일반적.
+* hibernate.hbm2ddl.auto 
+  * create-drop 
+    * 애플리케이션 구동 시 엔티티를 스캔하여 테이블을 만들고 관계 설정에 맞춰 제약조건을 구성. 
+    * 매 실행 시 기존 데이터베이스는 초기화.
+    * 테스트용 인메모리 데이터로 적합.
+  * update 
+    * 테이블 생성이 완료된 후 변경. 
+    * 엔티티에 발생한 수정 사항만을 데이터베이스에 적용. 
+```java
+hibernateProp.put("hibernate.hbm2ddl.auto", "create-drop");
+```
+

@@ -218,6 +218,11 @@ dependencies {
     // embedded database settings
     compile db.h2, db.derby
 
+    // hibernate settings
+    if(!project.name.contains("boot")) {
+        compile spring.annotationApi, spring.contextSupport, spring.orm, hibernate.em
+    }
+
     testCompile testing.junit
 }
 
