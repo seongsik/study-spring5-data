@@ -20,7 +20,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
-@ComponentScan(basePackages = {"com.sik.study.spring5.ch8"})
+@ComponentScan(basePackages = {"com.sik.study.spring5.ch8.service"})
 public class JpaConfig {
     private static final Logger logger = LoggerFactory.getLogger(JpaConfig.class);
 

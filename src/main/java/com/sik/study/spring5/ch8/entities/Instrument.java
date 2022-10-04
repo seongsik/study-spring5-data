@@ -1,6 +1,7 @@
 package com.sik.study.spring5.ch8.entities;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 
 @Entity
 @Getter @Setter @ToString
+@NoArgsConstructor
 @Table(name = "instrument")
 public class Instrument implements Serializable {
 

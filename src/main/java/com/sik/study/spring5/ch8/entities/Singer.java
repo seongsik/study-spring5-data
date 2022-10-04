@@ -15,6 +15,8 @@ import java.util.Set;
 @Getter @Setter @ToString
 @Table(name = "singer")
 @NamedQueries({
+        @NamedQuery(name = Singer.FIND_ALL,
+                query = "select s from Singer s"),
         @NamedQuery(name=Singer.FIND_SINGER_BY_ID,
                 query="select distinct s from Singer s " +
                         "left join fetch s.albums a " +
@@ -25,8 +27,13 @@ import java.util.Set;
                         "left join fetch s.albums a " +
                         "left join fetch s.instruments i")
 })
+@SqlResultSetMapping(
+        name = "singerResult",
+        entities = @EntityResult(entityClass = Singer.class)
+)
 public class Singer extends AbstractEntity {
 
+    public static final String FIND_ALL = "Singer.findAll";
     public static final String FIND_SINGER_BY_ID = "Singer.findById";
     public static final String FIND_ALL_WITH_ALBUM = "Singer.findAllWithAlbum";
 
