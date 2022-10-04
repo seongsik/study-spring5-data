@@ -13,7 +13,7 @@ group 'org.example'
 
 ext {
     //spring libs
-    springVersion = '5.3.22'
+    springVersion = '5.3.23'
     bootVersion = '2.0.6.RELEASE'
     springDataVersion = '2.0.11.RELEASE'
     springAmqpVersion = '2.1.0.RELEASE'
@@ -22,18 +22,18 @@ ext {
     springIntegrationVersion = '5.0.2.BUILD-SNAPSHOT'
 
     //logging libs
-    slf4jVersion = '1.7.30'
-    logbackVersion = '1.2.11'
+    slf4jVersion = '2.0.1'
+    logbackVersion = '1.4.1'
 
     groovyVersion = '2.4.5'
     guavaVersion = '21.0'
     lombokVersion = '1.18.24'
 
     aspectjVersion = '1.8.13'
-    derbyVersion = '10.13.1.1'
-    dbcpVersion = '2.1'
+    derbyVersion = '10.15.2.0'
+    dbcpVersion = '2.9.0'
     mysqlVersion = '6.0.6'
-    h2Version = '2.0.206'
+    h2Version = '2.1.214'
     jodaVersion = '2.9.9'
     utVersion = '6.0.1.GA'
     javaxValidationVersion = '2.0.0.Beta2'
@@ -54,7 +54,7 @@ ext {
     annotationApiVersion = '1.3.2'
 
     //persistency libraries
-    hibernateVersion = '5.6.5.Final'
+    hibernateVersion = '5.6.12.Final'
     hibernateJpaVersion = '1.0.2.Final'
     hibernateValidatorVersion = '5.4.3.Final' //6.0.0.Beta2
     atomikosVersion = '4.0.4'
@@ -102,7 +102,7 @@ ext {
             core       : "org.hibernate:hibernate-core:$hibernateVersion",
             envers     : "org.hibernate:hibernate-envers:$hibernateVersion",
             jpaApi     : "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:$hibernateJpaVersion",
-            querydslapt: "com.mysema.querydsl:querydsl-apt:2.7.1",
+            querydslapt: "com.mysema.querydsl:querydsl-apt:3.7.4",
             tx         : "com.atomikos:transactions-hibernate4:$atomikosVersion"
     ]
 
@@ -148,7 +148,7 @@ ext {
             validation     : "javax.validation:validation-api:$javaxValidationVersion",
             aspectjweaver  : "org.aspectj:aspectjweaver:$aspectjVersion",
             aspectjrt      : "org.aspectj:aspectjrt:$aspectjVersion",
-            lang3          : "org.apache.commons:commons-lang3:3.5",
+            lang3          : "org.apache.commons:commons-lang3:3.12.0",
             guava          : "com.google.guava:guava:$guavaVersion",
             joda           : "joda-time:joda-time:$jodaVersion",
             usertype       : "org.jadira.usertype:usertype.core:$utVersion",
@@ -224,7 +224,37 @@ dependencies {
     // JPA settings
     compile hibernate.em, hibernate.jpaApi
 
+    // Hibernate Metamodel Generator
+    compile hibernate.jpaModelGen
+    annotationProcessor(hibernate.jpaModelGen)
+    compile hibernate.querydslapt
+
     testCompile testing.junit
+}
+
+sourceSets {
+    generated
+}
+sourceSets.generated.java.srcDirs = ['src/main/generated']
+
+configurations {
+    querydslapt
+}
+
+task generateQueryDSL(type: JavaCompile, group: 'build', description: 'QueryDSL Query Type Generating.') {
+    source = sourceSets.main.java
+    classpath = configurations.compile + configurations.querydslapt
+    options.compilerArgs = [
+            "-proc:only",
+            "-processor", "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor"
+    ]
+    destinationDir = sourceSets.generated.java.srcDirs.iterator().next()
+}
+compileJava.dependsOn generateQueryDSL
+
+compileJava {
+    options.compilerArgs += ["-AaddGenerationDate=true"]
+    options.annotationProcessorGeneratedSourcesDirectory = file(sourceSets.generated.java.srcDirs)
 }
 
 test {

@@ -192,3 +192,38 @@ dependencies {
   testCompile testing.junit
 }
 ```
+
+* JPA 설정에 정의한 내용과 같이 EntityManagerFactory 를 통해 EntityManager가 서비스 클래스에서 주입된다.
+```java
+@PersistenceContext
+private EntityManager em;
+```
+
+### JPA2 Criteria API Query
+* 사용자가 입력할 가능성이 있는 조건의 조합 경우의 수만큼 쿼리를 사전에 준비하기는 어려움. 
+* JPA2 에서 강타입(Strong Typed) Criteria API Query를 제공함. 
+  * 엔티티 클래스의 메타 모델을 기반으로 검색 조건 전달. 
+  * 엔티티 클래스 메타 모델은 클래스명 뒤에 언더스코어(_)를 붙여 생성. 
+* 하이버네이트는 메타 모델 생성기라는 도구를 제공함.
+```groovy
+dependencies {
+  annotationProcessor "org.hibernate:hibernate-jpamodelgen:5.6.5.Final"
+  compile "com.mysema.querydsl:querydsl-apt:2.7.1"
+  ...
+}
+
+task generateQueryDSL(type: JavaCompile, group: 'build', description: 'QueryDSL Query Type Generating.') {
+  source = sourceSets.main.java
+  classpath = configurations.compile + configurations.querydslapt
+  options.compilerArgs = [
+          "-proc:only",
+          "-processor", "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor"
+  ]
+  destinationDir = sourceSets.generated.java.srcDirs.iterator().next()
+}
+compileJava.dependsOn generateQueryDSL
+```
+
+
+
+
