@@ -67,21 +67,21 @@ public class SingerServiceImpl implements SingerService {
         CriteriaQuery<Singer> cq = cb.createQuery(Singer.class);
         Root<Singer> singerRoot = cq.from(Singer.class);
 
-        singerRoot.fetch(Singer_.albums, JoinType.LEFT);
-        singerRoot.fetch(Singer_.instruments, JoinType.LEFT);
+//        singerRoot.fetch(Singer_.albums, JoinType.LEFT);
+//        singerRoot.fetch(Singer_.instruments, JoinType.LEFT);
 
         cq.select(singerRoot).distinct(true);
 
         Predicate criteria = cb.conjunction();
 
         if(firstName != null) {
-            Predicate p = cb.equal(singerRoot.get(Singer_.firstName), firstName);
-            criteria = cb.and(criteria, p);
+//            Predicate p = cb.equal(singerRoot.get(Singer_.firstName), firstName);
+//            criteria = cb.and(criteria, p);
         }
 
         if(lastName != null) {
-            Predicate p = cb.equal(singerRoot.get(Singer_.lastName), lastName);
-            criteria = cb.and(criteria, p);
+//            Predicate p = cb.equal(singerRoot.get(Singer_.lastName), lastName);
+//            criteria = cb.and(criteria, p);
         }
 
         cq.where(criteria);

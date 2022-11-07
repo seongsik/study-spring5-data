@@ -230,32 +230,35 @@ dependencies {
     compile hibernate.querydslapt
 
     testCompile testing.junit
+
+    // Spring Data JPA
+    compile spring.aop, spring.data, misc.guava
 }
 
 sourceSets {
     generated
 }
-sourceSets.generated.java.srcDirs = ['src/main/generated']
+//sourceSets.generated.java.srcDirs = ['src/main/generated']
 
-configurations {
-    querydslapt
-}
-
-task generateQueryDSL(type: JavaCompile, group: 'build', description: 'QueryDSL Query Type Generating.') {
-    source = sourceSets.main.java
-    classpath = configurations.compile + configurations.querydslapt
-    options.compilerArgs = [
-            "-proc:only",
-            "-processor", "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor"
-    ]
-    destinationDir = sourceSets.generated.java.srcDirs.iterator().next()
-}
-compileJava.dependsOn generateQueryDSL
-
-compileJava {
-    options.compilerArgs += ["-AaddGenerationDate=true"]
-    options.annotationProcessorGeneratedSourcesDirectory = file(sourceSets.generated.java.srcDirs)
-}
+//configurations {
+//    querydslapt
+//}
+//
+//task generateQueryDSL(type: JavaCompile, group: 'build', description: 'QueryDSL Query Type Generating.') {
+//    source = sourceSets.main.java
+//    classpath = configurations.compile + configurations.querydslapt
+//    options.compilerArgs = [
+//            "-proc:only",
+//            "-processor", "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor"
+//    ]
+//    destinationDir = sourceSets.generated.java.srcDirs.iterator().next()
+//}
+//compileJava.dependsOn generateQueryDSL
+//
+//compileJava {
+//    options.compilerArgs += ["-AaddGenerationDate=true"]
+//    options.annotationProcessorGeneratedSourcesDirectory = file(sourceSets.generated.java.srcDirs)
+//}
 
 test {
     useJUnitPlatform()

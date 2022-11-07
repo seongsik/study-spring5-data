@@ -1,10 +1,11 @@
 package com.sik.study.spring5.ch8.config;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -17,12 +18,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 @Configuration
 @EnableTransactionManagement
-@ComponentScan(basePackages = {"com.sik.study.spring5.ch8.service"})
-public class JpaConfig {
-    private static final Logger logger = LoggerFactory.getLogger(JpaConfig.class);
+@ComponentScan(basePackages = {"com.sik.study.spring5.ch8"})
+@EnableJpaRepositories(basePackages = {"com.sik.study.spring5.ch8.repositories"})
+@EnableJpaAuditing(auditorAwareRef = "auditorAwareBean")
+public class EnversConfig {
+
+    private static Logger logger = LoggerFactory.getLogger(EnversConfig.class);
 
     @Bean
     public DataSource dataSource() {
@@ -58,6 +63,16 @@ public class JpaConfig {
         hibernateProp.put("hibernate.max_fetch_depth", 3);
         hibernateProp.put("hibernate.jdbc.batch_size", 10);
         hibernateProp.put("hibernate.jdbc.fetch_size", 50);
+
+        //Properties for Hibernate Envers
+        hibernateProp.put("org.hibernate.envers.audit_table_suffix", "_H");
+        hibernateProp.put("org.hibernate.envers.revision_field_name", "AUDIT_REVISION");
+        hibernateProp.put("org.hibernate.envers.revision_type_field_name", "ACTION_TYPE");
+        hibernateProp.put("org.hibernate.envers.audit_strategy", "org.hibernate.envers.strategy.ValidityAuditStrategy");
+        hibernateProp.put("org.hibernate.envers.audit_strategy_validity_end_rev_field_name", "AUDIT_REVISION_END");
+        hibernateProp.put("org.hibernate.envers.audit_strategy_validity_store_revend_timestamp", "True");
+        hibernateProp.put("org.hibernate.envers.audit_strategy_validity_revend_timestamp_field_name",
+                "AUDIT_REVISION_END_TS");
         return hibernateProp;
     }
 
@@ -70,5 +85,4 @@ public class JpaConfig {
         factoryBean.afterPropertiesSet();
         return factoryBean.getNativeEntityManagerFactory();
     }
-
 }

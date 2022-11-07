@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -20,9 +21,10 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
-@ComponentScan(basePackages = {"com.sik.study.spring5.ch8.service"})
-public class JpaConfig {
-    private static final Logger logger = LoggerFactory.getLogger(JpaConfig.class);
+@ComponentScan(basePackages = {"com.sik.study.spring5.ch8"})
+@EnableJpaRepositories(basePackages = {"com.sik.study.spring5.ch8"})
+public class DataJpaConfig {
+    private static final Logger logger = LoggerFactory.getLogger(DataJpaConfig.class);
 
     @Bean
     public DataSource dataSource() {

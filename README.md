@@ -224,6 +224,134 @@ task generateQueryDSL(type: JavaCompile, group: 'build', description: 'QueryDSL 
 compileJava.dependsOn generateQueryDSL
 ```
 
+## Spring Data JPA
+* Spring JPA 의 하위 프로젝트로, JPA 애플리케이션 개발의 단순화 목적.
+* Repository Class 를 추상화하며 Entity Listener 를 이용해 Entity Class 의 기본적인 감사 정보를 추적.
+
+
+### Spring Data JPA Repository
+* Repository 인터페이스를 확장한 다양한 인터페이스를 제공. 
+* CrudRepository 인터페이스에 기본적인 CRUD 동작이 추상화되어 있어 일일히 구현할 필요가 없다. 
+  * 인터페이스 상속 시 제네릭 타입으로 엔티티와 ID타입을 전달한다. 
+* JpaRepository 는 CrudRepository 보다 진보된 형태로, 배치, 페이징, 정렬 기능을 제공. 
+
+#### Dependencies & Config
+```groovy
+dependencies {
+  compile "org.springframework.data:spring-data-jpa:2.0.11.RELEASE"
+  ...
+  testCompile testing.junit
+}
+```
+* Data JPA Repository 구현체를 빈으로 등록하기 위한 정의 필요.
+```java
+@Configuration
+...
+@EnableJpaRepositories(basePackages = {"com.sik.study.spring5.ch8"})
+public class DataJpaConfig {
+  ...
+}
+```
+
+
+### 데이터의 감사 (Audit)
+* 데이터의 생성자, 생성시각, 수정자, 수정시각.
+* Auditable Interface 상속을 통해 JPA Entity Listener 로서 감사 정보를 자동 추적하는 기능을 제공함. 
+
+#### Config
+* Jpa의 감사기능 활성화를 위한 선언 필요.
+* AuditorAwareBean 클래스는 작업을 수행하는 사용자 이름을 반환. 
+  * 서비스에서는 보안 인프라스트럭쳐로부터 사용자 정보를 반환할것.
+```java
+@Configuration
+...
+@EnableJpaAuditing(auditorAwareRef = "auditorAwareBean")
+public class DataJpaConfig {
+  ...
+}
+
+@Component
+public class AuditorAwareBean implements AuditorAware<String> {
+    public Optional<String> getCurrentAuditor() {
+        return Optional.of("prospring5") // User Name
+    }
+}
+```
 
 
 
+#### AuditableEntity
+* @EntityListener 애너테이션을 부여하고, 추적 대상 컬럼에 속성별 애너테이션을 부여한다.
+```java
+@Entity
+@EntityListener(AuditingEntityListener.class)
+@Table(name = "singer_audit")
+public class SingerAudit implements Serializable {
+  ...
+  @CreatedDate
+  @Column(name = "CREATED_DATE")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date createdDate;
+  ...
+}
+```
+* 아래와 같이 상속을 통해 간소화할 수 있다. 
+```java
+@Entity
+@Table(name = "singer_audit")
+public class SingerAudit implements AuditableEntity<SingerAudit> {
+  ...
+}
+```
+
+
+### Entity Version Control
+* 엔티티의 테이블마다 이력 테이블을 구성. 
+* 기본 구성은 엔티티와 동일하며 아래의 컬럼을 추가해 버전을 관리. 
+  * AUDIT_REVISION : 이력 레코드의 시작 개정 번호
+  * ACTION_TYPE : 조작 유형. 추가(0) 수정(1) 삭제(2)
+  * AUDIT_REVISION_END : 이력 레코드의 마지막 개정 번호 
+  * AUDIT_REVISION_END_TS : 마지막 개정이 수정된 시점의 타임스탬프
+
+* AuditEventListener 는 다양한 퍼시스턴스 이벤트를 가로채 엔티티 클래스의 수정 전 스냅샷을 이력 테이블에 저장.
+* 엔티티 클래스에 @Audited 애너테이션을 부여하여 버전관리 활성화.
+* 특정 필드를 감사 대상에서 제외하고자 하는 경우 @NotAudited 를 적용.
+
+
+#### Config
+```java
+@EnableJpaAuditing(auditorAwareRef = "auditorAwareBean")
+public class EnversConfig {
+  ...
+
+  public static Properties hibernateProperties() {
+    Properties hibernateProp = new Properties();
+    
+    ...
+
+    //Properties for Hibernate Envers
+    hibernateProp.put("org.hibernate.envers.audit_table_suffix", "_H");                 // 이력 테이블 접미어
+    hibernateProp.put("org.hibernate.envers.revision_field_name", "AUDIT_REVISION");    // 개정 번호 컬럼 지정
+    hibernateProp.put("org.hibernate.envers.revision_type_field_name", "ACTION_TYPE");  // 조작 유형 컬럼 지정
+    hibernateProp.put("org.hibernate.envers.audit_strategy", "org.hibernate.envers.strategy.ValidityAuditStrategy"); // 엔티티 버전 관리 감사 전략 
+    hibernateProp.put("org.hibernate.envers.audit_strategy_validity_end_rev_field_name", "AUDIT_REVISION_END"); // 이력 레코드 마지막 개정 번호 컬럼 지정
+    hibernateProp.put("org.hibernate.envers.audit_strategy_validity_store_revend_timestamp", "True"); // 마지막 개정번호의 타임스탬프 저장여부
+    hibernateProp.put("org.hibernate.envers.audit_strategy_validity_revend_timestamp_field_name",
+            "AUDIT_REVISION_END_TS");
+    return hibernateProp;
+  }
+}
+
+```
+
+## Spring Boot JPA
+* 엔티티, 데이터베이스, 저장소, 서비스를 포함한 모든 항목을 기본 제공.
+* 별도의 Configuration Class 가 필요치 않음. 
+
+```groovy
+dependencies {
+  compile "org.springframework.boot:spring-boot-starter-data-jpa:2.0.6.RELEASE"
+  compile "com.h2database:h2:2.1.214"
+  ...
+}
+```

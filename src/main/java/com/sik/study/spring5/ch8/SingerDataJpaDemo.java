@@ -1,7 +1,9 @@
 package com.sik.study.spring5.ch8;
 
+import com.sik.study.spring5.ch8.config.DataJpaConfig;
 import com.sik.study.spring5.ch8.config.JpaConfig;
 import com.sik.study.spring5.ch8.entities.Singer;
+import com.sik.study.spring5.ch8.service.DataJpaSingerService;
 import com.sik.study.spring5.ch8.service.SingerService;
 import com.sik.study.spring5.ch8.service.SingerServiceImpl;
 import org.slf4j.Logger;
@@ -11,12 +13,12 @@ import org.springframework.context.support.GenericApplicationContext;
 
 import java.util.List;
 
-public class SingerJpaDemo {
-    private static final Logger logger = LoggerFactory.getLogger(SingerJpaDemo.class);
+public class SingerDataJpaDemo {
+    private static final Logger logger = LoggerFactory.getLogger(SingerDataJpaDemo.class);
 
     public static void main(String[] args) {
-        GenericApplicationContext context = new  AnnotationConfigApplicationContext(JpaConfig.class);
-        SingerService singerService = context.getBean(SingerServiceImpl.class);
+        GenericApplicationContext context = new AnnotationConfigApplicationContext(DataJpaConfig.class);
+        DataJpaSingerService singerService = context.getBean(DataJpaSingerService.class);
 
         List<Singer> singers = singerService.findAll();
         printSingers(singers);
@@ -25,9 +27,8 @@ public class SingerJpaDemo {
     }
 
     private static void printSingers(List<Singer> singers) {
-        logger.info("--- Singer List");
-        singers.forEach(s -> {logger.info(s.toString());});
+        for (Singer singer : singers) {
+            System.out.println(singer.toString());
+        }
     }
-
-
 }
